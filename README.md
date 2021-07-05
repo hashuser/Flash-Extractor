@@ -1,2 +1,2 @@
 # Flash-Extractor
-A simple Flash Extractor for PowerPoint
+A simple Flash (SWF) Extractor for PowerPoint
