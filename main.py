@@ -13,24 +13,31 @@ def unzip_file(input_path,output_path):
     os.makedirs(new_output_path, exist_ok=True)
     for file in z.namelist():
         z.extract(file, new_output_path)
-    get_activex(new_output_path+'\\ppt\\activeX',output_path+'\\final_'+filename)
+    if not get_activex(new_output_path+'\\ppt\\activeX',output_path+'\\final_'+filename):
+        print('There is no Flash (SWF) in this PowerPoint')
+        shutil.rmtree(new_output_path)
+        return 0
     shutil.rmtree(new_output_path)
     return 1
 
 def get_activex(input_path,output_path):
-    files = os.listdir(input_path)
+    try:
+        files = os.listdir(input_path)
+    except Exception:
+        return 0
     for file in files:
         if '.xml' in file and 'active' in file:
             with open(input_path+'\\'+file, 'r') as f:
                 content = f.read()
             if 'D27CDB6E-AE6D-11CF-96B8-444553540000' in content:
                 decode_activex(input_path+'\\'+file[:file.rfind('.')] + '.bin',output_path,file[:file.rfind('.')])
+    return 1
 
 def decode_activex(input_path,output_path,filename):
     with open(input_path,'rb') as f:
         content = f.read()
     position = content.find(b'\x46\x57\x53')
-    s = content[position+4:content.find(b'\x00',position+5)].hex()
+    s = content[position+4:position+8].hex()
     t = ''
     for x in range(len(s)-1,0,-2):
         t += s[x-1] + s[x]
